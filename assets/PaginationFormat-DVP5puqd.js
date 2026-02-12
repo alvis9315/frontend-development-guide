@@ -1,11 +1,11 @@
-import{o as l,c as s,a as p,b as t,w as e,u as a,N as i,d as o,e as r}from"./index-DA_ol711.js";const c={__name:"PaginationFormat",setup(d){return(u,n)=>(l(),s("div",null,[n[4]||(n[4]=p(`<p class="muted" style="margin-bottom:24px;">前後端分頁參數與回應結構的統一規範。</p><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">🔍 查詢時（前端 → 後端）</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">前端送出參數</h4><p style="margin-bottom:12px;color:var(--muted);">使用 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">mergePaginationParameter</code> 方法合併：</p><pre>{
+import{o as l,c as p,a as s,b as t,w as e,u as a,N as i,d as o,e as r}from"./index-Dex8xNQU.js";const c={__name:"PaginationFormat",setup(d){return(u,n)=>(l(),p("div",null,[n[4]||(n[4]=s(`<p class="muted" style="margin-bottom:24px;">前後端分頁參數與回應結構的統一規範。</p><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">🔍 查詢時（前端 → 後端）</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">前端送出參數</h4><p style="margin-bottom:12px;color:var(--muted);">使用 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">mergePaginationParameter</code> 方法合併：</p><pre>{
   &quot;page&quot;: 1,        // 當前頁碼（從 1 開始）
-  &quot;size&quot;: 15,       // 每頁筆數
+  &quot;pageSize&quot;: 15,       // 每頁筆數
   ...其他查詢參數
-}</pre></article><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#2563eb;">後端接收規範</h4><p style="margin-bottom:16px;color:var(--muted);">後端需接收以下參數：</p><ul><li><code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">page</code> - 頁碼（從 1 開始）</li><li><code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">size</code> - 每頁筆數</li><li>其他業務查詢條件</li></ul></article></div></div><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">📦 回應時（後端 → 前端）</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#2563eb;">後端回傳結構</h4><p style="margin-bottom:12px;color:var(--muted);">必要欄位：</p><pre>{
+}</pre></article><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#2563eb;">後端接收規範</h4><p style="margin-bottom:16px;color:var(--muted);">後端需接收以下參數：</p><ul><li><code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">page</code> - 頁碼（從 1 開始）</li><li><code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">pageSize</code> - 每頁筆數</li><li>其他業務查詢條件</li></ul></article></div></div><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">📦 回應時（後端 → 前端）</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#2563eb;">後端回傳結構</h4><p style="margin-bottom:12px;color:var(--muted);">必要欄位：</p><pre>{
   &quot;content&quot;: [...],    // 資料陣列
-  &quot;number&quot;: 1,         // 當前頁碼
-  &quot;size&quot;: 15,          // 每頁筆數
+  &quot;page&quot;: 1,           // 當前頁碼
+  &quot;pageSize&quot;: 15,      // 每頁筆數
   &quot;total&quot;: 35,         // 總筆數
   &quot;offset&quot;: 0          // 位移量（選填）
 }</pre></article><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">前端處理方式</h4><p style="margin-bottom:12px;color:var(--muted);">使用 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">extractPaginationContent</code> 自動解析：</p><ul><li>提取 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">content</code> 資料陣列</li><li>自動計算並附加 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">$$RowNumber</code>（序號）</li><li>自動附加 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;">$$RowIndex</code>（索引）</li><li>更新分頁控制器狀態</li></ul></article></div></div>`,3)),t(a(r),{style:{"margin-bottom":"24px"}},{default:e(()=>[t(a(i),{name:"component"},{header:e(()=>[...n[0]||(n[0]=[o("span",{style:{"font-size":"1.1rem","font-weight":"600"}},"📄 分頁元件完整程式碼",-1)])]),default:e(()=>[n[1]||(n[1]=o("pre",{style:{margin:"0"}},`import { toValue } from '@vueuse/core'
@@ -109,6 +109,7 @@ export const usePagination = initialValue => {
     if (list.length > 0) {
       paginationModel.value.page = value.number
       paginationModel.value.pageSize = value.size
+      paginationModel.value.pageCount = value.totalPages
       paginationModel.value.itemCount = value.total
     } else {
       resetPaginationModel()
@@ -148,9 +149,10 @@ watch(() => paginationModel.value.page, () => {
 // 4. 處理後端回應資料
 const data = ref({
   content: [...],  // 資料陣列
-  number: 1,       // 當前頁碼
-  size: 10,        // 每頁筆數
+  page: 1,         // 當前頁碼
+  pageSize: 10,    // 每頁筆數
   total: 30,       // 總筆數
+  totalPages: 3,   // 總頁數
   offset: 0        // 起始索引
 })
 

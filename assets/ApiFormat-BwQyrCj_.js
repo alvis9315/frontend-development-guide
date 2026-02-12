@@ -1,4 +1,4 @@
-import{_ as o,o as e,c as r,a as s}from"./index-DA_ol711.js";const a="/frontend-development-guide/success%E7%AF%84%E4%BE%8B.png",d="/frontend-development-guide/failure%E7%AF%84%E4%BE%8B.png",l={};function n(i,t){return e(),r("div",null,[...t[0]||(t[0]=[s(`<p class="muted" style="margin-bottom:24px;">先確認資料結構、欄位命名與錯誤訊息的統一規範。要做為使用者的角度來檢測message的值是否清楚明確，不可有提示文字以外的內容如: 錯誤代碼、內部訊息等。</p><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">📝 儲存/修改 API</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;">規範要點</h4><ul><li>成功與失敗的回應格式一致</li><li>欄位命名一致（camelCase / snake_case）</li><li>缺少欄位是否回傳空值</li></ul></article></div><div class="grid" style="margin-top:16px;"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">✓ 成功 response</h4><pre>{
+import{_ as o,o as e,c as r,a as s}from"./index-Dex8xNQU.js";const a="/frontend-development-guide/success%E7%AF%84%E4%BE%8B.png",d="/frontend-development-guide/failure%E7%AF%84%E4%BE%8B.png",l={};function n(i,t){return e(),r("div",null,[...t[0]||(t[0]=[s(`<p class="muted" style="margin-bottom:24px;">先確認資料結構、欄位命名與錯誤訊息的統一規範。要做為使用者的角度來檢測message的值是否清楚明確，不可有提示文字以外的內容如: 錯誤代碼、內部訊息等。</p><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">📝 儲存/修改 API</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;">規範要點</h4><ul><li>成功與失敗的回應格式一致</li><li>欄位命名一致（camelCase / snake_case）</li><li>缺少欄位是否回傳空值</li></ul></article></div><div class="grid" style="margin-top:16px;"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">✓ 成功 response</h4><pre>{
   &quot;statusCode&quot;: &quot;200&quot;,
   &quot;message&quot;: &quot;儲存成功&quot;,
   &quot;success&quot;: &quot;true&quot;,
@@ -22,8 +22,8 @@ import{_ as o,o as e,c as r,a as s}from"./index-DA_ol711.js";const a="/frontend-
 mutationCache: new MutationCache({
   onSuccess: (data) =&gt; {
     destroyAll()
-    // 根據 failed 判斷彈窗類型
-    if (data?.failed) {
+    // 根據 success 判斷彈窗類型，但先前都是使用failed，所以暫時先保留兩種判斷方式
+    if (data?.failed||data?.success) {
       failure(data?.message)  // 顯示失敗彈窗
     } else if (data?.message?.length &gt; 0) {
       success(data?.message)  // 顯示成功彈窗
