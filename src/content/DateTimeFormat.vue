@@ -86,23 +86,26 @@
                 </tr>
               </tbody>
             </table>
-            <p style="font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 8px;">或 ISO 格式：</p>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tbody>
-                <tr>
-                  <td style="padding: 6px 0; color: var(--muted); width: 40%;">年月日</td>
-                  <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16</code></td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: var(--muted);">年月日時分</td>
-                  <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14</code></td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: var(--muted);">年月日時分秒</td>
-                  <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14:57</code></td>
-                </tr>
-              </tbody>
-            </table>
+            <div style="opacity: 0.5; filter: grayscale(1);">
+              <p style="font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 8px;">或 ISO 格式：</p>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tbody>
+                  <tr>
+                    <td style="padding: 6px 0; color: var(--muted); width: 40%;">年月日</td>
+                    <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16</code></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: var(--muted);">年月日時分</td>
+                    <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14</code></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: var(--muted);">年月日時分秒</td>
+                    <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14:57</code></td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="margin-top: 6px; color: var(--muted); font-size: 0.85rem;">（目前前端不儲存西元年，暫不啟用）</p>
+            </div>
           </div>
         </article>
         <article class="card">
@@ -126,23 +129,26 @@
                 </tr>
               </tbody>
             </table>
-            <p style="font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 8px;">或 ISO 格式：</p>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tbody>
-                <tr>
-                  <td style="padding: 6px 0; color: var(--muted); width: 40%;">年月日</td>
-                  <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16</code></td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: var(--muted);">年月日時分</td>
-                  <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14</code></td>
-                </tr>
-                <tr>
-                  <td style="padding: 6px 0; color: var(--muted);">年月日時分秒</td>
-                  <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14:57</code></td>
-                </tr>
-              </tbody>
-            </table>
+            <div>
+              <p style="font-size: 1rem; font-weight: 600; color: var(--text); margin-bottom: 8px;">或 ISO 格式：</p>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tbody>
+                  <tr>
+                    <td style="padding: 6px 0; color: var(--muted); width: 40%;">年月日</td>
+                    <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16</code></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: var(--muted);">年月日時分</td>
+                    <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14</code></td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 6px 0; color: var(--muted);">年月日時分秒</td>
+                    <td style="padding: 6px 0;"><code style="background: #f3f4f6; padding: 2px 8px; border-radius: 4px;">1995-03-16T18:14:57</code></td>
+                  </tr>
+                </tbody>
+              </table>
+              <p style="margin-top: 6px; color: var(--muted); font-size: 0.85rem;">（目前後端會接收西元年，要能接這格式）</p>
+            </div>
           </div>
         </article>
       </div>
