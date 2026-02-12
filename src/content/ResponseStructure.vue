@@ -11,19 +11,21 @@
         <div style="display: flex; gap: 24px; flex-wrap: wrap;">
         <div style="flex: 1; min-width: 260px;">
           <h4 style="color: #15803d; margin-bottom: 12px;">查詢 API 回傳格式</h4>
-          <pre>{
-  "name": "Jane",
-  "age": 25,
-  "email": "jane@example.com"
+          <p style="margin: -6px 0 10px; color: #166534;">若使用駝峰命名，大小寫需一致（含縮寫字母大小寫）。</p>
+    <pre>{
+  "userId": 123,
+  "userName": "Jane",
+  "createdAt": "2026-02-12T10:30:00"
 }</pre>
         </div>
 
         <div style="flex: 1; min-width: 260px;">
           <h4 style="color: #15803d; margin-bottom: 12px;">新增/編輯 API request 格式</h4>
+          <p style="margin: -6px 0 10px; color: #166534;">使用駝峰命名，大小寫需一致（含縮寫字母大小寫）。</p>
           <pre>{
-  "name": "Jane",
-  "age": 25,
-  "email": "jane@example.com"
+  "userId": 123,
+  "userName": "Jane",
+  "createdAt": "2026-02-12T10:30:00"
 }</pre>
         </div>
         </div>
@@ -36,6 +38,7 @@
             <li>降低串接錯誤率，提升開發效率</li>
           </ul>
         </div>
+
       </div>
     </div>
 

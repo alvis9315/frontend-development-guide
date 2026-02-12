@@ -116,7 +116,7 @@ const sections = [
   },
   { 
     id: 'section-9',
-    title: '9. 下拉選單 API',
+    title: '9. 下拉選單 API (待討論)',
     component: defineAsyncComponent(() => import('@/content/DropdownApi.vue'))
   },
   { 

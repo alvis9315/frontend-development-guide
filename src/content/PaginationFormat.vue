@@ -11,7 +11,7 @@
           <p style="margin-bottom: 12px; color: var(--muted);">使用 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">mergePaginationParameter</code> 方法合併：</p>
           <pre>{
   "page": 1,        // 當前頁碼（從 1 開始）
-  "size": 15,       // 每頁筆數
+  "pageSize": 15,       // 每頁筆數
   ...其他查詢參數
 }</pre>
         </article>
@@ -20,7 +20,7 @@
           <p style="margin-bottom: 16px; color: var(--muted);">後端需接收以下參數：</p>
           <ul>
             <li><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">page</code> - 頁碼（從 1 開始）</li>
-            <li><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">size</code> - 每頁筆數</li>
+            <li><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">pageSize</code> - 每頁筆數</li>
             <li>其他業務查詢條件</li>
           </ul>
         </article>
@@ -36,8 +36,8 @@
           <p style="margin-bottom: 12px; color: var(--muted);">必要欄位：</p>
           <pre>{
   "content": [...],    // 資料陣列
-  "number": 1,         // 當前頁碼
-  "size": 15,          // 每頁筆數
+  "page": 1,           // 當前頁碼
+  "pageSize": 15,      // 每頁筆數
   "total": 35,         // 總筆數
   "offset": 0          // 位移量（選填）
 }</pre>
@@ -162,6 +162,7 @@ export const usePagination = initialValue => {
     if (list.length > 0) {
       paginationModel.value.page = value.number
       paginationModel.value.pageSize = value.size
+      paginationModel.value.pageCount = value.totalPages
       paginationModel.value.itemCount = value.total
     } else {
       resetPaginationModel()
@@ -211,9 +212,10 @@ watch(() => paginationModel.value.page, () => {
 // 4. 處理後端回應資料
 const data = ref({
   content: [...],  // 資料陣列
-  number: 1,       // 當前頁碼
-  size: 10,        // 每頁筆數
+  page: 1,         // 當前頁碼
+  pageSize: 10,    // 每頁筆數
   total: 30,       // 總筆數
+  totalPages: 3,   // 總頁數
   offset: 0        // 起始索引
 })
 

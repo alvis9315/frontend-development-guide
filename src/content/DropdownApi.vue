@@ -19,8 +19,8 @@
       <div style="margin-bottom: 20px;">
         <h4 style="margin-bottom: 12px; color: #1f2a37;">後端 API 回傳範例</h4>
         <pre>[
-  { "dcCode": "A001", "dcName": "類別一", "depName": "部門一" },
-  { "dcCode": "A002", "dcName": "類別二", "depName": "部門二" }
+  { "dcName": "類別一", "depName": "部門一", "dcCode": "A001", },
+  { "dcName": "類別二", "depName": "部門二", "dcCode": "A002", }
 ]</pre>
       </div>
 
