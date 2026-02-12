@@ -108,9 +108,9 @@ mutationCache: new MutationCache({
   onSuccess: (data) => {
     destroyAll()
     // 根據 success 判斷彈窗類型，但先前都是使用failed，所以暫時先保留兩種判斷方式
-    if (data?.failed||data?.success) {
+    if (data?.failed || !data?.success) {
       failure(data?.message)  // 顯示失敗彈窗
-    } else if (data?.message?.length > 0) {
+    } else if (data?.message?.length > 0 || data?.success) {
       success(data?.message)  // 顯示成功彈窗
     }
   },

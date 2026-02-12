@@ -3,7 +3,7 @@
     :theme-overrides="themeOverrides"
     abstract
   >
-    <n-message-provider>
+    <n-message-provider placement="top-right">
       <router-view />
     </n-message-provider>
   </n-config-provider>

@@ -24,6 +24,7 @@
               <a 
                 :href="`#${section.id}`" 
                 class="sidebar-link"
+                :class="{ active: activeSection === section.id }"
                 @click.prevent="scrollToSection(section.id)"
               >
                 {{ section.title }}
@@ -60,7 +61,7 @@
 </template>
 
 <script setup>
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { NCollapse, NCollapseItem } from 'naive-ui'
 
 const sections = [
@@ -123,14 +124,24 @@ const sections = [
     id: 'appendix',
     title: '10. 測試環境',
     component: defineAsyncComponent(() => import('@/content/TestEnvironment.vue'))
+  },
+  { 
+    id: 'section-11',
+    title: '11. 測試帳號',
+    component: defineAsyncComponent(() => import('@/content/TestAccounts.vue'))
   }
 ]
+
+const activeSection = ref(sections[0]?.id || '')
+let onScrollHandler
+let rafId = null
 
 // 预设全部展开
 const expandedNames = sections.map(s => s.id)
 
 // 滚动到指定章节
 const scrollToSection = (sectionId) => {
+  activeSection.value = sectionId
   const element = document.getElementById(sectionId)
   if (element) {
     // 如果是第一个section，直接滚动到顶部
@@ -154,6 +165,51 @@ const scrollToSection = (sectionId) => {
     })
   }
 }
+
+const updateActiveSection = () => {
+  const offsetTop = 140
+  const sectionElements = sections
+    .map(section => document.getElementById(section.id))
+    .filter(Boolean)
+
+  if (!sectionElements.length) return
+
+  let current = sectionElements[0]
+  for (const el of sectionElements) {
+    if (el.getBoundingClientRect().top - offsetTop <= 0) {
+      current = el
+    } else {
+      break
+    }
+  }
+
+  activeSection.value = current.id
+}
+
+onMounted(() => {
+  onScrollHandler = () => {
+    if (rafId) return
+    rafId = requestAnimationFrame(() => {
+      updateActiveSection()
+      rafId = null
+    })
+  }
+
+  window.addEventListener('scroll', onScrollHandler, { passive: true })
+  window.addEventListener('resize', onScrollHandler, { passive: true })
+  updateActiveSection()
+})
+
+onBeforeUnmount(() => {
+  if (onScrollHandler) {
+    window.removeEventListener('scroll', onScrollHandler)
+    window.removeEventListener('resize', onScrollHandler)
+  }
+  if (rafId) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
+})
 </script>
 
 <style scoped>
@@ -210,6 +266,12 @@ const scrollToSection = (sectionId) => {
 }
 
 .sidebar-link:hover {
+  background: #f1f5f9;
+  color: #475569;
+  transform: translateX(4px);
+}
+
+.sidebar-link.active {
   background: #f1f5f9;
   color: #475569;
   transform: translateX(4px);
