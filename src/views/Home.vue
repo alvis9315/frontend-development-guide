@@ -51,10 +51,12 @@
       <div 
         v-if="showMobileMenu"
         class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+        style="height: 100dvh; min-height: 100vh;"
         @click="toggleMobileMenu"
       >
         <div 
           class="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-2xl overflow-y-auto"
+          style="height: 100dvh; min-height: 100vh;"
           @click.stop
         >
           <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
