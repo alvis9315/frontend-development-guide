@@ -1,18 +1,18 @@
 <template>
-  <div>
+  <div class="min-w-0">
     <!-- Header with responsive padding -->
-    <header class="hero sticky top-0 z-50 bg-gradient-to-b from-indigo-50 to-slate-50 border-b border-gray-200 px-3 py-2 sm:px-4 sm:py-3 md:px-6 lg:px-11">
-      <nav class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
-        <div class="font-bold text-base sm:text-lg lg:text-xl tracking-wide pt-1">Frontend Development Guide</div>
+    <header class="hero sticky top-0 z-50 bg-gradient-to-b from-indigo-50 to-slate-50 border-b border-gray-200 px-3 py-2 sm:px-4 sm:py-3 md:px-6 lg:px-8">
+      <nav class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3 mb-2 sm:mb-3">
+        <div class="font-bold text-sm sm:text-base lg:text-lg tracking-wide break-words max-w-full">Frontend Development Guide</div>
       </nav>
-      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4">
-        <h2 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">RDSS專案-前後端協作規範</h2>
-        <span class="text-xs sm:text-sm md:text-base text-gray-500 whitespace-nowrap">最後編輯日期：2026-03-04</span>
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-3">
+        <h2 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold break-words max-w-full">RDSS專案-前後端協作規範</h2>
+        <span class="text-xs sm:text-sm text-gray-500 shrink-0">最後編輯日期：2026-03-04</span>
       </div>
     </header>
 
     <!-- Content wrapper with responsive layout -->
-    <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 mx-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8 lg:px-12">
+    <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 w-full px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8 lg:px-8">
       <!-- Sidebar - hidden on mobile, visible on desktop -->
       <aside class="hidden lg:block lg:flex-shrink-0 lg:w-64 lg:sticky lg:top-44 lg:self-start lg:max-h-[calc(100vh-11rem)] lg:overflow-y-auto">
         <nav class="bg-white rounded-xl p-5 shadow-lg">
@@ -87,7 +87,7 @@
       </div>
 
       <!-- Main content with responsive width -->
-      <main id="sections" class="flex-1 min-w-0">
+      <main id="sections" class="flex-1 min-w-0 w-full max-w-full overflow-x-hidden">
         <n-collapse :default-expanded-names="expandedNames" arrow-placement="right">
           <n-collapse-item 
             v-for="section in sections" 
