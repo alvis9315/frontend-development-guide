@@ -1,30 +1,31 @@
 <template>
   <div>
-    <header class="hero">
-      <nav class="nav">
-        <div class="brand">Frontend Development Guide</div>
+    <!-- Header with responsive padding -->
+    <header class="hero sticky top-0 z-50 bg-gradient-to-b from-indigo-50 to-slate-50 border-b border-gray-200 px-3 py-2 sm:px-4 sm:py-3 md:px-6 lg:px-11">
+      <nav class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 mb-3 sm:mb-4">
+        <div class="font-bold text-base sm:text-lg lg:text-xl tracking-wide pt-1">Frontend Development Guide</div>
       </nav>
-    <div style="display: flex; align-items: end; justify-content: space-between; gap: 16px;">
-      <h2>RDSS專案-前後端協作規範</h2>
-      <span style="font-size: 0.95rem; color: var(--muted); white-space: nowrap;">最後編輯日期：2026-02-12</span>
-    </div>
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-4">
+        <h2 class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold">RDSS專案-前後端協作規範</h2>
+        <span class="text-xs sm:text-sm md:text-base text-gray-500 whitespace-nowrap">最後編輯日期：2026-03-04</span>
+      </div>
     </header>
 
-    <div class="content-wrapper">
-      <!-- 左側導航 -->
-      <aside class="sidebar">
-        <nav class="sidebar-nav">
-          <div class="sidebar-title">目錄</div>
-          <ul class="sidebar-menu">
+    <!-- Content wrapper with responsive layout -->
+    <div class="flex flex-col lg:flex-row gap-4 sm:gap-6 mx-auto px-3 py-4 sm:px-4 sm:py-6 md:px-6 md:py-8 lg:px-12">
+      <!-- Sidebar - hidden on mobile, visible on desktop -->
+      <aside class="hidden lg:block lg:flex-shrink-0 lg:w-64 lg:sticky lg:top-44 lg:self-start lg:max-h-[calc(100vh-11rem)] lg:overflow-y-auto">
+        <nav class="bg-white rounded-xl p-5 shadow-lg">
+          <div class="text-xl font-bold mb-4 text-slate-600">目錄</div>
+          <ul class="space-y-1">
             <li 
               v-for="section in sections" 
               :key="section.id"
-              class="sidebar-item"
             >
               <a 
                 :href="`#${section.id}`" 
-                class="sidebar-link"
-                :class="{ active: activeSection === section.id }"
+                class="block px-3 py-2.5 text-gray-600 no-underline rounded-lg transition-all duration-200 text-sm hover:bg-slate-100 hover:text-slate-700 hover:translate-x-1"
+                :class="{ 'bg-slate-100 text-slate-700 translate-x-1': activeSection === section.id }"
                 @click.prevent="scrollToSection(section.id)"
               >
                 {{ section.title }}
@@ -34,8 +35,59 @@
         </nav>
       </aside>
 
-      <!-- 主要內容 -->
-      <main id="sections" class="container">
+      <!-- Mobile navigation menu button -->
+      <div class="lg:hidden fixed bottom-6 right-6 z-40">
+        <button 
+          @click="toggleMobileMenu"
+          class="bg-indigo-600 text-white p-4 rounded-full shadow-xl hover:bg-indigo-700 transition-colors"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mobile menu overlay -->
+      <div 
+        v-if="showMobileMenu"
+        class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-50"
+        @click="toggleMobileMenu"
+      >
+        <div 
+          class="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-white shadow-2xl overflow-y-auto"
+          @click.stop
+        >
+          <div class="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+            <div class="text-xl font-bold text-slate-700">目錄</div>
+            <button 
+              @click="toggleMobileMenu"
+              class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <ul class="p-4 space-y-2">
+            <li 
+              v-for="section in sections" 
+              :key="section.id"
+            >
+              <a 
+                :href="`#${section.id}`" 
+                class="block px-4 py-3 text-gray-600 no-underline rounded-lg transition-all duration-200 hover:bg-slate-100 hover:text-slate-700"
+                :class="{ 'bg-indigo-100 text-indigo-700 font-medium': activeSection === section.id }"
+                @click="scrollToSectionMobile(section.id)"
+              >
+                {{ section.title }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Main content with responsive width -->
+      <main id="sections" class="flex-1 min-w-0">
         <n-collapse :default-expanded-names="expandedNames" arrow-placement="right">
           <n-collapse-item 
             v-for="section in sections" 
@@ -44,8 +96,8 @@
             :id="section.id"
           >
             <template #header>
-              <div style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                <span style="font-size: 1.75rem; font-weight: 700;">{{ section.title }}</span>
+              <div class="flex items-center justify-between w-full">
+                <span class="text-lg md:text-xl lg:text-2xl font-bold">{{ section.title }}</span>
               </div>
             </template>
             <component :is="section.component" />
@@ -54,8 +106,9 @@
       </main>
     </div>
 
-    <footer class="footer">
-      <p>© 2026 Frontend Communication Guide Template</p>
+    <!-- Footer with responsive padding -->
+    <footer class="py-8 md:py-10 px-4 text-center text-gray-500 border-t border-gray-200">
+      <p class="text-sm md:text-base">© 2026 Frontend Communication Guide Template</p>
     </footer>
   </div>
 </template>
@@ -85,16 +138,6 @@ const sections = [
     title: '4. 分頁資料格式',
     component: defineAsyncComponent(() => import('@/content/PaginationFormat.vue'))
   },
-//   { 
-//     id: 'section-5',
-//     title: '5. 訊息顯示策略',
-//     component: defineAsyncComponent(() => import('@/content/MessageStrategy.vue'))
-//   },
-//   { 
-//     id: 'section-6',
-//     title: '6. 多選欄位格式',
-//     component: defineAsyncComponent(() => import('@/content/MultiSelectFormat.vue'))
-//   },
   { 
     id: 'section-5',
     title: '5. API 呼叫方式',
@@ -133,18 +176,24 @@ const sections = [
 ]
 
 const activeSection = ref(sections[0]?.id || '')
+const showMobileMenu = ref(false)
 let onScrollHandler
 let rafId = null
 
-// 预设全部展开
+// 預設全部展開
 const expandedNames = sections.map(s => s.id)
 
-// 滚动到指定章节
+// 切換移動版選單
+const toggleMobileMenu = () => {
+  showMobileMenu.value = !showMobileMenu.value
+}
+
+// 滾動到指定章節
 const scrollToSection = (sectionId) => {
   activeSection.value = sectionId
   const element = document.getElementById(sectionId)
   if (element) {
-    // 如果是第一个section，直接滚动到顶部
+    // 如果是第一個section，直接滾動到頂部
     if (sectionId === 'section-1') {
       window.scrollTo({
         top: 0,
@@ -153,9 +202,9 @@ const scrollToSection = (sectionId) => {
       return
     }
     
-    // 其他section对齐sidebar位置，需要额外考虑collapse-item的margin-top: 20px
-    const sidebarTop = 130 // 与sidebar的top保持一致
-    const collapseItemMargin = 20 // n-collapse-item__header的margin-top
+    // 其他section對齊sidebar位置
+    const sidebarTop = 130
+    const collapseItemMargin = 20
     const elementPosition = element.getBoundingClientRect().top
     const offsetPosition = elementPosition + window.pageYOffset - sidebarTop
     
@@ -164,6 +213,12 @@ const scrollToSection = (sectionId) => {
       behavior: 'smooth'
     })
   }
+}
+
+// 移動版滾動並關閉選單
+const scrollToSectionMobile = (sectionId) => {
+  scrollToSection(sectionId)
+  toggleMobileMenu()
 }
 
 const updateActiveSection = () => {
@@ -213,104 +268,34 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.content-wrapper {
-  display: flex;
-  gap: 24px;
-  margin: 0 auto;
-  padding: 30px 50px;
-}
-
-.sidebar {
-  flex-shrink: 0;
-  /* width: 260px; */
-  position: fixed;
-  top: 180px;
-  /* left: clamp(24px, 5vw, 80px); */
-  height: fit-content;
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
-}
-
-.sidebar-nav {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.sidebar-title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-  color: #475569;
-}
-
-.sidebar-menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.sidebar-item {
-  margin-bottom: 4px;
-}
-
-.sidebar-link {
-  display: block;
-  padding: 10px 12px;
-  color: #6b7280;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-  font-size: 0.95rem;
-}
-
-.sidebar-link:hover {
-  background: #f1f5f9;
-  color: #475569;
-  transform: translateX(4px);
-}
-
-.sidebar-link.active {
-  background: #f1f5f9;
-  color: #475569;
-  transform: translateX(4px);
-}
-
-.container {
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  margin-left: 284px;
-}
-
-@media (max-width: 1024px) {
-  .content-wrapper {
-    flex-direction: column;
-  }
-  
-  .sidebar {
-    position: static;
-    width: 100%;
-    max-height: none;
-    margin-bottom: 32px;
-  }
-}
+/* 使用 Tailwind 的 @apply 來保留必要的樣式 */
 :deep(.n-collapse-item__header) {
-  margin-top: 20px;
-  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-radius: 8px;
-  padding: 20px;
-  transition: all 0.3s ease;
-  background: #ffffff; */
-  cursor: pointer;
+  @apply mt-5 cursor-pointer;
 }
 
 :deep(.n-collapse-item__header-main) {
-  width: 100%;
+  @apply w-full;
 }
 
 :deep(.n-collapse-item__content) {
-  padding: 20px;
+  @apply p-5;
+}
+
+/* 自定義滾動條樣式 */
+aside::-webkit-scrollbar {
+  width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 </style>
