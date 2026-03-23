@@ -20,7 +20,7 @@
           <h4 style="margin-bottom: 12px; font-size: 1rem; color: #059669;">✓ 成功 response</h4>
           <pre>{
   "message": "儲存成功",
-  "success": "true",
+  "success": true,
   "data": { ... }
 }</pre>
         </article>
@@ -28,7 +28,7 @@
           <h4 style="margin-bottom: 12px; font-size: 1rem; color: #dc2626;">✗ 失敗 response</h4>
           <pre>{
   "message": "XX欄位應輸入....",
-  "success": "false",
+  "success": false,
   "data": { ... }
 }</pre>
         </article>
@@ -53,7 +53,7 @@
           <h4 style="margin-bottom: 12px; font-size: 1rem; color: #059669;">✓ 成功 response</h4>
           <pre>{
   "message": "查詢成功",
-  "success": "true",
+  "success": true,
   "data": { ... }
 }</pre>
         </article>
@@ -61,7 +61,7 @@
           <h4 style="margin-bottom: 12px; font-size: 1rem; color: #dc2626;">✗ 失敗 response</h4>
           <pre>{
   "message": "該帳號尚未通過XX流程",
-  "success": "false",
+  "success": false,
   "data": { ... }
 }</pre>
         </article>
