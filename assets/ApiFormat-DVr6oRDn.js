@@ -1,18 +1,18 @@
-import{_ as o,o as e,c as r,a as s}from"./index-CTdc_s9-.js";const a="/frontend-development-guide/success%E7%AF%84%E4%BE%8B.png",n="/frontend-development-guide/failure%E7%AF%84%E4%BE%8B.png",l={};function i(d,t){return e(),r("div",null,[...t[0]||(t[0]=[s(`<p class="muted" style="margin-bottom:24px;">先確認資料結構、欄位命名與錯誤訊息的統一規範。要做為使用者的角度來檢測message的值是否清楚明確，不可有提示文字以外的內容如: 錯誤代碼、內部訊息等。</p><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">📝 儲存/修改 API</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;">規範要點</h4><ul><li>成功與失敗的回應格式一致</li><li>欄位命名一致（camelCase / snake_case）</li><li>缺少欄位是否回傳空值</li></ul></article></div><div class="grid" style="margin-top:16px;"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">✓ 成功 response</h4><pre>{
+import{_ as o,o as e,c as r,a as s}from"./index-DqN47yuv.js";const a="/frontend-development-guide/success%E7%AF%84%E4%BE%8B.png",n="/frontend-development-guide/failure%E7%AF%84%E4%BE%8B.png",l={};function i(d,t){return e(),r("div",null,[...t[0]||(t[0]=[s(`<p class="muted" style="margin-bottom:24px;">先確認資料結構、欄位命名與錯誤訊息的統一規範。要做為使用者的角度來檢測message的值是否清楚明確，不可有提示文字以外的內容如: 錯誤代碼、內部訊息等。</p><div style="margin-bottom:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">📝 儲存/修改 API</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;">規範要點</h4><ul><li>成功與失敗的回應格式一致</li><li>欄位命名一致（camelCase / snake_case）</li><li>缺少欄位是否回傳空值</li></ul></article></div><div class="grid" style="margin-top:16px;"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">✓ 成功 response</h4><pre>{
   &quot;message&quot;: &quot;儲存成功&quot;,
-  &quot;success&quot;: &quot;true&quot;,
+  &quot;success&quot;: true,
   &quot;data&quot;: { ... }
 }</pre></article><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#dc2626;">✗ 失敗 response</h4><pre>{
   &quot;message&quot;: &quot;XX欄位應輸入....&quot;,
-  &quot;success&quot;: &quot;false&quot;,
+  &quot;success&quot;: false,
   &quot;data&quot;: { ... }
 }</pre></article></div></div><div><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">🔍 查詢 API</h3><div class="grid"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;">規範要點</h4><ul><li>成功與失敗的回應格式一致</li><li>欄位命名一致（camelCase / snake_case）</li><li>缺少欄位是否回傳空值</li></ul></article></div><div class="grid" style="margin-top:16px;"><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#059669;">✓ 成功 response</h4><pre>{
   &quot;message&quot;: &quot;查詢成功&quot;,
-  &quot;success&quot;: &quot;true&quot;,
+  &quot;success&quot;: true,
   &quot;data&quot;: { ... }
 }</pre></article><article class="card"><h4 style="margin-bottom:12px;font-size:1rem;color:#dc2626;">✗ 失敗 response</h4><pre>{
   &quot;message&quot;: &quot;該帳號尚未通過XX流程&quot;,
-  &quot;success&quot;: &quot;false&quot;,
+  &quot;success&quot;: false,
   &quot;data&quot;: { ... }
 }</pre></article></div></div><div style="margin-top:48px;"><h3 style="font-size:1.25rem;margin-bottom:20px;color:var(--text);">💬 前端彈窗處理邏輯</h3><div class="callout" style="margin-bottom:24px;background:#eff6ff;border-color:#93c5fd;"><p style="color:#1e40af;margin-bottom:12px;"><strong>📌 為何需要 message 和 success 參數？</strong></p><ul style="margin:0;padding-left:20px;line-height:1.8;color:#1e40af;"><li><strong>message：</strong>前端透過此參數接收後端回傳的提示訊息，用於顯示彈窗內容</li><li><strong>success：</strong>前端根據此參數判斷下一步行為（如導向列表頁、停留編輯頁等）</li></ul></div><article class="card" style="background:#f9fafb;margin-bottom:24px;"><h4 style="margin-bottom:12px;color:#1f2a37;">前端判斷邏輯</h4><div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;"><p style="margin:0;color:#6b7280;flex-shrink:0;"> 以操作邏輯來說，肯定且正面的狀態時使用 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;color:#059669;">success()</code></p><img src="`+a+'" alt="success() 彈窗範例" style="max-width:400px;border-radius:8px;box-shadow:0 2px 8px rgba(0, 0, 0, 0.1);"></div><div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;"><p style="margin:0;color:#6b7280;flex-shrink:0;"> 反之則使用 <code style="background:#f3f4f6;padding:2px 6px;border-radius:4px;color:#dc2626;">failure()</code></p><img src="'+n+`" alt="failure() 彈窗範例" style="max-width:400px;border-radius:8px;box-shadow:0 2px 8px rgba(0, 0, 0, 0.1);"></div><pre>// main.js - MutationCache 配置
 mutationCache: new MutationCache({
