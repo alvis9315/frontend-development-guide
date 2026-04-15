@@ -200,7 +200,7 @@
                 <h4 style="margin-bottom: 12px; font-size: 1rem; color: #2563eb;">回傳值</h4>
                 <pre>{
   paginationModel,           // 分頁狀態物件
-  updatePaginationPage,      // 更新頁碼函數
+  updatePaginationPage,      // 更新頁碼函數（必須使用此函數處理換頁，才會觸發 API 請求）
   mergePaginationParameter,  // 合併分頁參數到 API 請求
   extractPaginationContent,  // 從 API 回應中提取分頁資料
 }</pre>
@@ -225,6 +225,11 @@
             <article class="card" style="margin-bottom: 24px;">
               <h4 style="margin-bottom: 12px; font-size: 1rem; color: #7c3aed;">1. mergePaginationParameter(parameter)</h4>
               <p style="margin-bottom: 12px; color: var(--muted);">將分頁參數合併到 API 請求參數中</p>
+              <div style="margin-bottom: 12px; padding: 12px; background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 4px;">
+                <p style="margin: 0; color: #1e40af; font-size: 0.9rem;">
+                  <strong>內部機制：</strong><code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">pageNo</code> 來自內部的 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">requestPage</code>（而非 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">paginationModel.page</code>），只有透過 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">updatePaginationPage</code> 才會更新 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">requestPage</code>。這確保 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">extractPaginationContent</code> 回寫 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">paginationModel.page</code> 時不會觸發 computed 重算，避免無限 API 循環。
+                </p>
+              </div>
               <div class="grid">
                 <div>
                   <p style="margin-bottom: 8px; font-weight: 600; color: #059669;">輸入</p>
@@ -250,7 +255,8 @@
                 <div class="grid">
                   <div>
                     <p style="margin-bottom: 8px; color: #059669;">✓ 格式 1（推薦）：使用 page/size</p>
-                    <pre>{
+                    <pre>// API 回應格式
+{
   content: [...],      // 資料陣列
   page: 1,            // 當前頁
   size: 15,           // 每頁筆數
@@ -261,7 +267,8 @@
                   </div>
                   <div>
                     <p style="margin-bottom: 8px; color: #2563eb;">✓ 格式 2：使用 number/pageSize</p>
-                    <pre>{
+                    <pre>// API 回應格式
+{
   content: [...],      // 資料陣列
   number: 1,          // 當前頁（替代 page）
   pageSize: 15,       // 每頁筆數（替代 size）
@@ -281,13 +288,82 @@
             </article>
           </div>
 
+          <!-- ⚠️ 換頁必須使用 updatePaginationPage -->
+          <div style="margin-bottom: 48px;">
+            <h3 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--text);">⚠️ 換頁必須使用 updatePaginationPage</h3>
+            
+            <div style="padding: 20px; background: #fef2f2; border: 2px solid #fca5a5; border-radius: 8px; margin-bottom: 20px;">
+              <p style="color: #991b1b; font-size: 1.05rem; font-weight: 700; margin-bottom: 12px;">
+                🚨 重要行為規則：所有換頁操作一律使用 updatePaginationPage
+              </p>
+              <p style="color: #991b1b; line-height: 1.8; margin: 0;">
+                不能直接賦值 <code style="background: #fecaca; padding: 2px 6px; border-radius: 4px;">paginationModel.page = page</code>，這樣<strong>只會更新 UI，不會觸發 API 請求</strong>。
+              </p>
+            </div>
+
+            <div class="grid" style="margin-bottom: 20px;">
+              <article class="card" style="border-left: 4px solid #dc2626;">
+                <h5 style="margin-bottom: 12px; color: #dc2626;">❌ 錯誤寫法</h5>
+                <pre>// 直接賦值 → 只更新 UI，不觸發 API
+paginationModel.value.page = 2
+
+// 事件處理中直接賦值 → 同樣不會觸發 API
+@update:page="page =&gt; (paginationModel.page = page)"</pre>
+              </article>
+              <article class="card" style="border-left: 4px solid #059669;">
+                <h5 style="margin-bottom: 12px; color: #059669;">✅ 正確寫法</h5>
+                <pre>// 使用函數 → 同時更新 requestPage 和 UI，觸發 API
+updatePaginationPage(2)
+
+// 事件處理中使用函數
+@update:page="updatePaginationPage"</pre>
+              </article>
+            </div>
+
+            <div style="padding: 16px; background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 6px;">
+              <p style="color: #1e40af; font-weight: 600; margin-bottom: 8px;">為什麼？</p>
+              <p style="color: #1e40af; line-height: 1.8; margin-bottom: 12px;">
+                <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">mergePaginationParameter</code> 產生 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">pageNo</code> 時，讀取的是內部獨立的 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">requestPage</code>，<strong>不是</strong> <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">paginationModel.page</code>。
+              </p>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>操作</th>
+                      <th>更新 requestPage</th>
+                      <th>更新 UI (paginationModel.page)</th>
+                      <th>觸發 API</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><code>paginationModel.page = 2</code></td>
+                      <td style="color: #dc2626;">❌</td>
+                      <td style="color: #059669;">✅</td>
+                      <td style="color: #dc2626;">❌</td>
+                    </tr>
+                    <tr>
+                      <td><code>updatePaginationPage(2)</code></td>
+                      <td style="color: #059669;">✅</td>
+                      <td style="color: #059669;">✅</td>
+                      <td style="color: #059669;">✅</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style="color: #1e40af; line-height: 1.8; margin-top: 12px; margin-bottom: 0;">
+                這個設計是為了避免無限循環：<code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">extractPaginationContent</code> 會回寫 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">paginationModel.page</code>，如果 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">mergePaginationParameter</code> 也讀取它，就會形成 computed → API → 回寫 → computed 的無限循環。透過 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">requestPage</code> 將兩者分離，徹底切斷循環。
+              </p>
+            </div>
+          </div>
+
           <!-- AppPagination 元件 -->
           <div style="margin-bottom: 48px;">
             <h3 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--text);">🎨 AppPagination 元件</h3>
             
             <div class="callout" style="margin-bottom: 20px;">
               <p style="margin-bottom: 8px;"><strong>檔案位置：</strong><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">src/components/AppPagination.vue</code></p>
-              <p style="margin: 0;"><strong>功能：</strong>符合 WCAG AA 標準的分頁 UI 元件，用於替換 Naive UI 的 n-pagination</p>
+              <p style="margin: 0;"><strong>功能：</strong><strong>專為無障礙網頁設計的分頁 UI 元件</strong>，符合 WCAG 2.1 AA 無障礙標準，主要用於 <strong>public 頁面（非登入頁面）</strong>以通過無障礙檢測</p>
             </div>
 
             <div class="table-wrap" style="margin-bottom: 24px;">
@@ -354,13 +430,19 @@
             </div>
 
             <div style="padding: 16px; background: #eff6ff; border-radius: 6px; border-left: 3px solid #3b82f6;">
-              <p style="margin-bottom: 8px; color: #1e40af; font-weight: 600;">✨ 無障礙特性</p>
+              <p style="margin-bottom: 8px; color: #1e40af; font-weight: 600;">✨ 無障礙特性（WCAG 2.1 AA 標準）</p>
+              <div style="margin-bottom: 12px; padding: 10px; background: #dbeafe; border-radius: 4px;">
+                <p style="margin: 0; color: #1e40af; font-size: 0.9rem;">
+                  <strong>重要提醒：</strong>本元件專為通過政府網站無障礙檢測而設計，確保視障、肢障等使用者也能順利操作分頁功能。
+                </p>
+              </div>
               <ul style="color: #1e40af; line-height: 1.8; margin: 0; padding-left: 20px;">
-                <li>aria-label：每個按鈕都有明確標籤</li>
-                <li>aria-current="page"：標示當前頁</li>
-                <li>鍵盤導航：支援 Tab 鍵切換</li>
-                <li>視覺提示：當前頁高亮、disabled 狀態明確</li>
-                <li>螢幕閱讀器友善：提供完整資訊</li>
+                <li><strong>ARIA 標籤：</strong><code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">aria-label</code> 為每個按鈕提供明確說明（如「第 3 頁」、「上一頁」）</li>
+                <li><strong>當前頁標示：</strong><code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">aria-current="page"</code> 告知螢幕閱讀器目前所在頁面</li>
+                <li><strong>鍵盤導航：</strong>完整支援 Tab 鍵切換、Enter/Space 鍵觸發</li>
+                <li><strong>視覺對比：</strong>當前頁高亮、disabled 狀態明確，符合色彩對比度要求</li>
+                <li><strong>螢幕閱讀器：</strong>提供完整的頁碼資訊朗讀（如「共 150 筆資料」）</li>
+                <li><strong>焦點管理：</strong>清晰的焦點框線，易於追蹤當前位置</li>
               </ul>
             </div>
 
@@ -401,9 +483,10 @@
 
     &lt;!-- 分頁元件 --&gt;
     &lt;app-pagination
-      v-model:page="paginationModel.page"
+      :page="paginationModel.page"
       :total="paginationModel.itemCount"
       :page-size="paginationModel.pageSize"
+      @update:page="updatePaginationPage"
     /&gt;
   &lt;/div&gt;
 &lt;/template&gt;
@@ -411,7 +494,7 @@
 &lt;script setup&gt;
 import { useGetDataList } from '@/api/example'
 
-const { paginationModel, mergePaginationParameter, extractPaginationContent } = usePagination()
+const { paginationModel, updatePaginationPage, mergePaginationParameter, extractPaginationContent } = usePagination()
 
 const queryParams = computed(() =&gt; mergePaginationParameter({}))
 const { data: apiResponse } = useGetDataList(queryParams)
@@ -432,7 +515,7 @@ const dataList = computed(() =&gt; extractPaginationContent(apiResponse.value))
     single-line
     accessible
     :pagination="paginationModel"
-    @update:page="page =&gt; (paginationModel.page = page)"
+    @update:page="updatePaginationPage"
   &gt;
     &lt;tbody&gt;
       &lt;tr v-for="item in dataList" :key="item.id"&gt;
@@ -446,7 +529,7 @@ const dataList = computed(() =&gt; extractPaginationContent(apiResponse.value))
 &lt;script setup&gt;
 import { useGetDataList } from '@/api/example'
 
-const { paginationModel, mergePaginationParameter, extractPaginationContent } = usePagination()
+const { paginationModel, updatePaginationPage, mergePaginationParameter, extractPaginationContent } = usePagination()
 
 const queryParams = computed(() =&gt; mergePaginationParameter({}))
 const { data: apiResponse } = useGetDataList(queryParams)
@@ -458,8 +541,8 @@ const dataList = computed(() =&gt; extractPaginationContent(apiResponse.value))
                     <ul style="color: #92400e; line-height: 1.8; margin: 0; padding-left: 20px;">
                       <li>必須加上 <code style="background: #fde68a; padding: 2px 6px; border-radius: 4px;">accessible</code> prop（public 頁面使用無障礙版本）</li>
                       <li>傳入 <code style="background: #fde68a; padding: 2px 6px; border-radius: 4px;">:pagination="paginationModel"</code>（將整個分頁狀態傳入）</li>
-                      <li>監聽 <code style="background: #fde68a; padding: 2px 6px; border-radius: 4px;">@update:page</code> 事件並更新 paginationModel.page</li>
-                      <li><strong>如果忘記監聽 @update:page 事件，分頁點擊會沒有反應！</strong></li>
+                      <li>監聽 <code style="background: #fde68a; padding: 2px 6px; border-radius: 4px;">@update:page</code> 事件並呼叫 <code style="background: #fde68a; padding: 2px 6px; border-radius: 4px;">updatePaginationPage</code></li>
+                      <li><strong>必須使用 <code style="background: #fde68a; padding: 2px 6px; border-radius: 4px;">updatePaginationPage</code> 處理換頁事件，直接修改 <code style="background: #fde68a; padding: 2px 6px; border-radius: 4px;">paginationModel.page</code> 不會觸發 API 請求！</strong></li>
                     </ul>
                   </div>
                 </div>
@@ -491,7 +574,7 @@ const dataList = computed(() =&gt; extractPaginationContent(apiResponse.value))
       single-line
       accessible
       :pagination="paginationModel"
-      @update:page="page =&gt; (paginationModel.page = page)"
+      @update:page="updatePaginationPage"
     &gt;
       &lt;tbody&gt;
         &lt;tr v-for="item in dataList" :key="item.id"&gt;
@@ -516,7 +599,7 @@ const searchModel = ref({
 const queryParams = ref({})
 
 // 分頁管理
-const { paginationModel, mergePaginationParameter, extractPaginationContent } = usePagination()
+const { paginationModel, updatePaginationPage, mergePaginationParameter, extractPaginationContent } = usePagination()
 
 // 合併分頁參數
 const apiParams = computed(() =&gt; mergePaginationParameter(queryParams.value))
@@ -546,7 +629,7 @@ const handleReset = () => {
                 </template>
                 <pre style="margin: 0;">&lt;script setup&gt;
 // 初始化時設定每頁 20 筆
-const { paginationModel } = usePagination({
+const { paginationModel, updatePaginationPage } = usePagination({
   pageSize: 20
 })
 &lt;/script&gt;
@@ -555,7 +638,7 @@ const { paginationModel } = usePagination({
   &lt;app-table
     accessible
     :pagination="paginationModel"
-    @update:page="page =&gt; (paginationModel.page = page)"
+    @update:page="updatePaginationPage"
   &gt;
     &lt;!-- 表格內容 --&gt;
   &lt;/app-table&gt;
@@ -569,10 +652,11 @@ const { paginationModel } = usePagination({
                 <pre style="margin: 0;">&lt;template&gt;
   &lt;!-- 最多顯示 5 個頁碼按鈕（預設 7 個） --&gt;
   &lt;app-pagination
-    v-model:page="paginationModel.page"
+    :page="paginationModel.page"
     :total="paginationModel.itemCount"
     :page-size="paginationModel.pageSize"
     :max-page-buttons="5"
+    @update:page="updatePaginationPage"
   /&gt;
 &lt;/template&gt;
 
@@ -614,76 +698,190 @@ watchEffect(() => {
 
             <div class="callout" style="margin-bottom: 16px;">
               <p style="font-weight: 600; margin-bottom: 8px;">Q2: 為什麼 AppTable 的分頁點擊沒反應？</p>
-              <p style="margin-bottom: 12px;">忘記監聽 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">@update:page</code> 事件！</p>
-              <div class="grid">
-                <div>
-                  <p style="color: #dc2626; margin-bottom: 8px;">❌ 錯誤：沒有監聽事件</p>
-                  <pre>&lt;app-table :pagination="paginationModel"&gt;</pre>
-                </div>
-                <div>
-                  <p style="color: #059669; margin-bottom: 8px;">✓ 正確：完整的事件監聽</p>
-                  <pre>&lt;app-table
+              <p style="margin-bottom: 12px;">忘記監聽 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">@update:page</code> 事件！必須這樣寫：</p>
+              <pre style="margin-bottom: 16px;">&lt;!-- ❌ 錯誤：沒有監聽事件 --&gt;
+&lt;app-table :pagination="paginationModel"&gt;
+
+&lt;!-- ❌ 錯誤：直接修改 paginationModel.page，不會觸發 API 請求 --&gt;
+&lt;app-table :pagination="paginationModel" @update:page="page =&gt; (paginationModel.page = page)"&gt;
+
+&lt;!-- ✅ 正確：使用 updatePaginationPage --&gt;
+&lt;app-table
   :pagination="paginationModel"
-  @update:page="page =&gt; (paginationModel.page = page)"
+  @update:page="updatePaginationPage"
 &gt;</pre>
-                </div>
+              <div style="padding: 12px; background: #f0fdf4; border-left: 3px solid #10b981; border-radius: 4px;">
+                <p style="color: #166534; font-weight: 600; margin-bottom: 8px;">運作原理：</p>
+                <ol style="color: #166534; margin: 0; padding-left: 20px; line-height: 1.8;">
+                  <li>使用者點擊頁碼按鈕</li>
+                  <li>AppPagination 元件發出 <code style="background: #bbf7d0; padding: 2px 4px; border-radius: 3px;">update:page</code> 事件</li>
+                  <li>AppTable 接收到事件後，再次發出 <code style="background: #bbf7d0; padding: 2px 4px; border-radius: 3px;">update:page</code> 事件</li>
+                  <li>父元件透過 <code style="background: #bbf7d0; padding: 2px 4px; border-radius: 3px;">updatePaginationPage</code> 同時更新內部 <code style="background: #bbf7d0; padding: 2px 4px; border-radius: 3px;">requestPage</code> 和 <code style="background: #bbf7d0; padding: 2px 4px; border-radius: 3px;">paginationModel.page</code></li>
+                  <li><code style="background: #bbf7d0; padding: 2px 4px; border-radius: 3px;">requestPage</code> 更新後，<code style="background: #bbf7d0; padding: 2px 4px; border-radius: 3px;">mergePaginationParameter</code> 的 computed 重新計算，觸發 API 請求</li>
+                </ol>
               </div>
             </div>
 
             <div class="callout" style="margin-bottom: 16px;">
               <p style="font-weight: 600; margin-bottom: 8px;">Q3: AppTable 的 accessible prop 是什麼？</p>
               <p style="margin-bottom: 8px;">控制使用哪一種分頁元件：</p>
-              <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
-                <li><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">accessible</code> - 使用無障礙版本的 AppPagination（public 頁面）</li>
-                <li>不加或 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">accessible=false</code> - 使用 Naive UI 的 n-pagination（admin 頁面）</li>
+              <ul style="margin-bottom: 12px; padding-left: 20px; line-height: 1.8;">
+                <li><code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">accessible</code> - 使用 <strong>AppPagination 無障礙版本</strong>（符合 WCAG AA 標準）</li>
+                <li>不加或 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">accessible=false</code> - 使用 Naive UI 的 n-pagination（無障礙不合規）</li>
               </ul>
+              <pre>&lt;!-- ✅ Public 頁面（對外服務，必須符合無障礙標準） --&gt;
+&lt;app-table accessible :pagination="paginationModel"&gt;
+
+&lt;!-- ❌ Private 頁面（內部管理系統，不需無障礙檢測） --&gt;
+&lt;app-table :pagination="paginationModel"&gt;</pre>
+              <div style="margin-top: 12px; padding: 12px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 4px;">
+                <p style="margin: 0; color: #92400e; font-size: 0.9rem;">
+                  <strong>📌 重要提醒：</strong>所有 <strong>public 資料夾下的頁面</strong>都必須加上 <code style="background: #fde68a; padding: 2px 4px; border-radius: 3px;">accessible</code>，政府網站無障礙檢測會檢查這些頁面。
+                </p>
+              </div>
             </div>
 
             <div class="callout" style="margin-bottom: 16px;">
               <p style="font-weight: 600; margin-bottom: 8px;">Q4: 為什麼要分成兩個部分（usePagination + AppPagination）？</p>
               <p style="margin-bottom: 8px;">遵循 Vue 3 Composition API 的最佳實踐：</p>
-              <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+              <ul style="margin-bottom: 12px; padding-left: 20px; line-height: 1.8;">
                 <li><strong>usePagination</strong>：可重複使用的邏輯（純 JavaScript，可用於不同的 UI）</li>
                 <li><strong>AppPagination</strong>：可自訂的展示層（Vue 元件，可替換成其他 UI）</li>
               </ul>
+              <p style="margin-bottom: 8px;">這樣的設計讓你可以：</p>
+              <ol style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                <li>在不同元件間共用分頁邏輯</li>
+                <li>輕鬆替換 UI 元件而不影響邏輯</li>
+                <li>更容易測試和維護</li>
+              </ol>
             </div>
 
-            <div class="callout">
-              <p style="font-weight: 600; margin-bottom: 8px;">Q5: API 回應格式不符合怎麼辦？</p>
+            <div class="callout" style="margin-bottom: 16px;">
+              <p style="font-weight: 600; margin-bottom: 8px;">Q5: 可以不使用 AppPagination 元件嗎？</p>
+              <p style="margin-bottom: 8px;">可以！<code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">usePagination</code> 是獨立的，你可以：</p>
+              <ol style="margin-bottom: 12px; padding-left: 20px; line-height: 1.8;">
+                <li>使用其他分頁 UI 元件</li>
+                <li>自己手刻分頁 HTML</li>
+                <li>使用第三方套件</li>
+              </ol>
+              <p style="margin: 0;">只要透過 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">updatePaginationPage</code> 更新頁碼即可（不能直接修改 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">paginationModel.page</code>）。</p>
+            </div>
+
+            <div class="callout" style="margin-bottom: 16px;">
+              <p style="font-weight: 600; margin-bottom: 8px;">Q6: API 回應格式不符合怎麼辦？</p>
               <div style="padding: 12px; background: #fef2f2; border-left: 3px solid #dc2626; border-radius: 4px; margin-bottom: 12px;">
                 <p style="color: #991b1b; margin: 0;">
                   <strong>⚠️ 重要：</strong>後端應該遵循統一的分頁格式規範。如果發現格式不符合，請<strong>優先回報後端團隊修正</strong>，而不是前端自行轉換。
                 </p>
               </div>
-              <p style="margin-bottom: 8px;"><strong>正常情況：</strong></p>
+              <p style="margin-bottom: 8px;">正常情況下<strong>不需要特殊處理</strong>，因為：</p>
               <ul style="margin-bottom: 12px; padding-left: 20px; line-height: 1.8;">
-                <li>後端已統一使用標準格式（content、number、size、totalPages、total、offset）</li>
-                <li>前端 extractPaginationContent 會自動解析</li>
-                <li>不需要額外處理</li>
+                <li>✅ <strong>後端應遵循標準格式</strong>：專案後端 API 已統一使用標準分頁格式</li>
+                <li>✅ <strong>前端自動適配</strong>：<code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">extractPaginationContent</code> 已支援兩種常見格式</li>
               </ul>
-              <p style="margin-bottom: 8px;"><strong>發現不符合的 API 時：</strong></p>
+              <div class="grid" style="margin-bottom: 12px;">
+                <div>
+                  <p style="margin-bottom: 8px; color: #059669; font-weight: 600;">格式 1（推薦）：使用 page/size</p>
+                  <pre>{
+  content: [...],
+  page: 1,
+  size: 15,
+  totalPages: 10,
+  total: 150
+}</pre>
+                </div>
+                <div>
+                  <p style="margin-bottom: 8px; color: #2563eb; font-weight: 600;">格式 2：使用 number/pageSize</p>
+                  <pre>{
+  content: [...],
+  number: 1,
+  pageSize: 15,
+  totalPages: 10,
+  total: 150
+}</pre>
+                </div>
+              </div>
+              <p style="margin-bottom: 8px;"><strong>⚠️ 如果遇到格式不符合的情況：</strong></p>
               <ol style="margin-bottom: 12px; padding-left: 20px; line-height: 1.8;">
-                <li><strong>回報後端</strong>：請後端團隊調整該 API 為標準格式</li>
-                <li><strong>記錄問題</strong>：將不符合的 API 列入待修正清單</li>
-                <li><strong>臨時方案</strong>（不推薦）：前端暫時轉換格式</li>
+                <li><strong>優先做法</strong>：聯繫後端團隊調整 API 回應格式，統一使用標準格式</li>
+                <li><strong>臨時方案</strong>（不推薦，會增加維護成本）</li>
               </ol>
               <details style="margin-top: 12px;">
                 <summary style="cursor: pointer; color: #6b7280; font-size: 0.9rem;">臨時轉換方案（僅供緊急使用，不建議長期保留）</summary>
-                <pre style="margin-top: 8px;">const { data: apiResponse } = useGetDataList(apiParams)
+                <pre style="margin-top: 8px;">// 臨時方案範例（不推薦）
+const { data: apiResponse } = useGetDataList(apiParams)
 
 const dataList = computed(() =&gt; {
   if (!apiResponse.value) return []
   
-  // ⚠️ 臨時方案：手動轉換格式
-  // TODO: 請後端修正 API 格式後移除此段程式碼
-  paginationModel.value.itemCount = apiResponse.value.totalItems
-  paginationModel.value.pageCount = apiResponse.value.totalPages
+  // 將非標準格式轉換為標準格式
+  const standardFormat = {
+    content: apiResponse.value.items,
+    page: apiResponse.value.currentPage,
+    size: apiResponse.value.perPage,
+    totalPages: apiResponse.value.pages,
+    total: apiResponse.value.totalItems
+  }
   
-  return apiResponse.value.items
-})
-
-// ⚠️ 記得在程式碼中加上 TODO，提醒未來移除</pre>
+  return extractPaginationContent(standardFormat)
+})</pre>
+                <p style="margin-top: 8px; color: #6b7280; font-size: 0.9rem;">💡 發現格式不符時，請回報給後端團隊統一調整，避免每個頁面都要寫轉換邏輯。</p>
               </details>
+            </div>
+
+            <div class="callout" style="margin-bottom: 16px;">
+              <p style="font-weight: 600; margin-bottom: 8px;">Q7: 如何在頁碼變更時觸發額外動作？</p>
+              <p style="margin-bottom: 8px;">使用 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">watchEffect</code> 或 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">watch</code>：</p>
+              <pre>import { useAppScroll } from '@/composables/useAppScroll'
+
+const { scrollToTop } = useAppScroll()
+
+watchEffect(() =&gt; {
+  // 當 page 改變時，捲動到頂部
+  if (paginationModel.value.page) {
+    scrollToTop()
+    console.log('切換到第', paginationModel.value.page, '頁')
+  }
+})</pre>
+            </div>
+
+            <div class="callout" style="margin-bottom: 16px;">
+              <p style="font-weight: 600; margin-bottom: 8px;">Q8: AppTable 沒有 pagination prop 怎麼辦？</p>
+              <p style="margin-bottom: 8px;">這種情況表示這個 app-table 只用來展示靜態資料，不需要分頁功能：</p>
+              <pre>&lt;!-- 靜態表格，只需要 accessible --&gt;
+&lt;app-table accessible&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td&gt;資料1&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;td&gt;資料2&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/app-table&gt;</pre>
+              <p style="margin-top: 8px; margin-bottom: 0;">只有需要分頁功能的表格才需要加上 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">:pagination</code> 和 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">@update:page</code>。</p>
+            </div>
+
+            <div class="callout">
+              <p style="font-weight: 600; margin-bottom: 8px;">Q9: 為什麼不能直接用 paginationModel.page = page 處理換頁？</p>
+              <p style="margin-bottom: 12px;">因為 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">mergePaginationParameter</code> 內部使用獨立的 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">requestPage</code> 來產生 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">pageNo</code>，而非讀取 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">paginationModel.page</code>。</p>
+              <p style="margin-bottom: 12px;">直接修改 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">paginationModel.page</code> 只會更新 UI 顯示，<strong>不會觸發 API 請求</strong>。必須透過 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">updatePaginationPage</code> 同時更新 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">requestPage</code> 和 <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 4px;">paginationModel.page</code>：</p>
+              <pre>// ❌ 錯誤：只更新 UI，不觸發 API
+paginationModel.value.page = 2
+
+// ✅ 正確：同時更新 requestPage 和 UI，觸發 API
+updatePaginationPage(2)</pre>
+              <div style="margin-top: 16px; padding: 12px; background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 4px;">
+                <p style="color: #1e40af; font-weight: 600; margin-bottom: 8px;">設計原因：</p>
+                <p style="color: #1e40af; margin-bottom: 8px; line-height: 1.6;"><code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">extractPaginationContent</code> 會從 API 回應中回寫 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">paginationModel.page</code>（同步總頁數、總筆數等 UI 狀態）。如果 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">mergePaginationParameter</code> 直接讀取 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">paginationModel.page</code>，就會形成無限循環：</p>
+                <pre style="margin-bottom: 12px;">extractPaginationContent 寫入 paginationModel.page
+  → mergePaginationParameter 的 computed 重算
+  → 產生新物件觸發 vue-query
+  → API 請求 → 回應
+  → extractPaginationContent 又寫入
+  → 無限循環 ♻️</pre>
+                <p style="color: #1e40af; margin: 0; line-height: 1.6;">透過 <code style="background: #dbeafe; padding: 2px 4px; border-radius: 3px;">requestPage</code> 將「API 請求用的頁碼」和「UI 顯示用的頁碼」分離，徹底切斷循環。</p>
+              </div>
             </div>
           </div>
         </div>
