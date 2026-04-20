@@ -1,0 +1,456 @@
+<template>
+  <div class="space-y-8">
+    <!-- 適用規範依據 -->
+    <section>
+      <h3 class="text-lg font-bold text-slate-700 mb-3">適用規範依據</h3>
+      <p class="text-sm text-gray-600 mb-3">本文件依據以下資安規範中的輸入驗證控制措施要求撰寫：</p>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">規範</th>
+              <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">對應條文 / 說明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="px-4 py-2 font-medium">SSDLC（安全軟體開發生命週期）</td>
+              <td class="px-4 py-2">輸入驗證（Input Validation）控制措施，要求於伺服器端驗證所有輸入之語法、語義、長度及字元集</td>
+            </tr>
+            <tr class="border-b bg-gray-50">
+              <td class="px-4 py-2 font-medium">OWASP Top 10 A03:2021 – Injection</td>
+              <td class="px-4 py-2">防止 SQL Injection、XSS、Command Injection 等注入攻擊，建議以白名單驗證輸入</td>
+            </tr>
+            <tr class="border-b">
+              <td class="px-4 py-2 font-medium">行政院「資通系統防護基準」</td>
+              <td class="px-4 py-2">資通系統應驗證使用者輸入之有效語法與語義（字元集、長度、數值範圍、可接受值），並建立輸入白名單或以黑名單過濾惡意資料</td>
+            </tr>
+            <tr class="bg-gray-50">
+              <td class="px-4 py-2 font-medium">ISO/IEC 27002:2022 — 8.28 安全程式設計</td>
+              <td class="px-4 py-2">要求對所有外部輸入進行驗證，避免已知弱點（如 Injection、Buffer Overflow）</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-sm text-gray-600 mt-3">本文件整理目前後端已實作內容與待補強之處，並提供對應實作指引。</p>
+    </section>
+
+    <!-- 一、目前已實作 -->
+    <section>
+      <h3 class="text-lg font-bold text-slate-700 mb-3">一、目前已實作（可參考）</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">機制</th>
+              <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">實作位置</th>
+              <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">說明</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="px-4 py-2 font-medium">Bean Validation @Valid</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">DTO + Controller</code></td>
+              <td class="px-4 py-2">欄位必填、格式驗證</td>
+            </tr>
+            <tr class="border-b bg-gray-50">
+              <td class="px-4 py-2 font-medium">XSS 黑名單過濾</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">XssStringJsonDeserializer + XssProtectionUtils</code></td>
+              <td class="px-4 py-2">全域套用於 JSON Body</td>
+            </tr>
+            <tr class="border-b">
+              <td class="px-4 py-2 font-medium">密碼字元集白名單</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">PWordUtils.checkPWordRule()</code></td>
+              <td class="px-4 py-2">限制可用字元與長度</td>
+            </tr>
+            <tr class="bg-gray-50">
+              <td class="px-4 py-2 font-medium">統一例外處理</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">RestApiExceptionHandler</code></td>
+              <td class="px-4 py-2">驗證失敗回傳 400</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 二、待補強項目與實作方式 -->
+    <section>
+      <h3 class="text-lg font-bold text-slate-700 mb-3">二、待補強項目與實作方式</h3>
+
+      <!-- SSDLC 架構方向說明 -->
+      <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-lg mb-6">
+        <h4 class="font-bold text-blue-800 mb-2">📌 SSDLC 架構方向說明</h4>
+        <p class="text-sm text-blue-900 mb-3">
+          依據 SSDLC 規範，建議將現有使用 <code class="bg-blue-100 px-1 rounded">GET + @RequestParam</code> 的 API 全面改為
+          <code class="bg-blue-100 px-1 rounded">POST + Request Body</code>。此方式可同時解決以下問題，且不需額外補強 XSS 過濾與 Bean Validation：
+        </p>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-blue-200 rounded-lg overflow-hidden">
+            <thead class="bg-blue-100">
+              <tr>
+                <th class="px-4 py-2 text-left font-semibold text-blue-800 border-b">問題</th>
+                <th class="px-4 py-2 text-center font-semibold text-blue-800 border-b">GET + @RequestParam</th>
+                <th class="px-4 py-2 text-center font-semibold text-blue-800 border-b">POST + Request Body</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b">
+                <td class="px-4 py-2">參數暴露於 URL / Log</td>
+                <td class="px-4 py-2 text-center text-red-500">❌</td>
+                <td class="px-4 py-2 text-center text-green-600">✅ 參數在 Body，不出現於 URL</td>
+              </tr>
+              <tr class="border-b bg-blue-50/50">
+                <td class="px-4 py-2">XSS 自動過濾</td>
+                <td class="px-4 py-2 text-center text-red-500">❌ 需額外處理</td>
+                <td class="px-4 py-2 text-center text-green-600">✅ 全域 XssStringJsonDeserializer 自動覆蓋</td>
+              </tr>
+              <tr class="border-b">
+                <td class="px-4 py-2">Bean Validation</td>
+                <td class="px-4 py-2 text-center text-red-500">❌ 需加 @Validated</td>
+                <td class="px-4 py-2 text-center text-green-600">✅ @Valid 直接作用於 DTO</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2">敏感資料（身分證、帳號）外洩風險</td>
+                <td class="px-4 py-2 text-center text-red-500">❌ 容易被 access log 記錄</td>
+                <td class="px-4 py-2 text-center text-green-600">✅ 不出現在 log</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- @RequestParam 保留情境 -->
+      <div class="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg mb-6">
+        <h4 class="font-bold text-amber-800 mb-2">@RequestParam 僅保留於以下無法改變的情境</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-amber-200 rounded-lg overflow-hidden">
+            <thead class="bg-amber-100">
+              <tr>
+                <th class="px-4 py-2 text-left font-semibold text-amber-800 border-b">情境</th>
+                <th class="px-4 py-2 text-left font-semibold text-amber-800 border-b">說明</th>
+                <th class="px-4 py-2 text-left font-semibold text-amber-800 border-b">範例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b">
+                <td class="px-4 py-2 font-medium">第三方 OAuth / SSO 回調</td>
+                <td class="px-4 py-2">第三方規範強制使用 URL 參數，後端無法控制格式</td>
+                <td class="px-4 py-2"><code class="bg-amber-100 px-1 rounded text-xs">/callback?code=xxx&amp;state=yyy</code></td>
+              </tr>
+              <tr class="border-b bg-amber-50/50">
+                <td class="px-4 py-2 font-medium">瀏覽器直接觸發的檔案下載</td>
+                <td class="px-4 py-2">需讓瀏覽器直接開啟 URL，不能用 POST Body</td>
+                <td class="px-4 py-2"><code class="bg-amber-100 px-1 rounded text-xs">/file/download?token=xxx</code></td>
+              </tr>
+              <tr class="border-b">
+                <td class="px-4 py-2 font-medium">Spring Actuator 內建端點</td>
+                <td class="px-4 py-2">框架自己定義，開發者無法修改</td>
+                <td class="px-4 py-2"><code class="bg-amber-100 px-1 rounded text-xs">/actuator/health</code></td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-medium">符合 RESTful 語意的識別用路徑</td>
+                <td class="px-4 py-2">@PathVariable 用於資源識別（非查詢條件），屬例外但須補上長度驗證</td>
+                <td class="px-4 py-2"><code class="bg-amber-100 px-1 rounded text-xs">/api/users/{id}</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="text-sm text-amber-800 mt-3 font-medium">
+          ⚠️ 以上例外情境若出現敏感資料（身分證號、帳號等），仍應避免使用 URL 參數，改以 POST Body 傳遞。
+        </p>
+      </div>
+
+      <!-- ❶ GET 改 POST -->
+      <div class="mb-6">
+        <h4 class="font-bold text-slate-700 mb-2">❶ 現有 GET + @RequestParam API 改為 POST + Request Body</h4>
+        <p class="text-sm text-gray-600 mb-3">
+          <code class="bg-gray-100 px-1 rounded">@RequestParam</code> 參數出現在 URL 中，會被伺服器 access log、瀏覽器歷史、Proxy 記錄，
+          且不受全域 <code class="bg-gray-100 px-1 rounded">XssStringJsonDeserializer</code> 保護，需額外補強。
+        </p>
+
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-3">
+          <p class="text-sm font-semibold text-red-700 mb-2">❌ 問題範例（Pnr014b02Controller.java）</p>
+          <pre class="bg-red-100 p-3 rounded text-xs overflow-x-auto text-gray-800"><code>// ❌ 參數暴露於 URL，無 XSS 過濾，無長度驗證
+@GetMapping("/list")
+public ResponseEntity&lt;?&gt; getList(
+    @RequestParam String status,
+    @RequestParam String applyStage,
+    @RequestParam(required = false) String seqNo,
+    @RequestParam(required = false) String idNo,
+    @RequestParam(required = false) String yy
+)</code></pre>
+        </div>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p class="text-sm font-semibold text-green-700 mb-2">✅ 修正方式：改為 POST + DTO</p>
+          <p class="text-sm font-medium text-green-800 mb-2">Step 1：建立對應的 Request DTO</p>
+          <pre class="bg-green-100 p-3 rounded text-xs overflow-x-auto mb-3 text-gray-800"><code>import jakarta.validation.constraints.*;
+import lombok.Data;
+
+@Data
+public class GetListReq {
+
+    @NotBlank(message = "status 不能為空")
+    @Pattern(regexp = "^[0-9]$", message = "status 格式錯誤，應為單一數字")
+    private String status;
+
+    @NotBlank(message = "applyStage 不能為空")
+    @Size(max = 10, message = "applyStage 長度不可超過10字元")
+    private String applyStage;
+
+    @Size(max = 20, message = "seqNo 長度不可超過20字元")
+    private String seqNo;
+
+    @Size(max = 10, message = "idNo 長度不可超過10字元")
+    private String idNo;
+
+    @Pattern(regexp = "^[0-9]{3,4}$", message = "yy 格式錯誤，應為3~4位數字")
+    private String yy;
+}</code></pre>
+
+          <p class="text-sm font-medium text-green-800 mb-2">Step 2：Controller 改為 @PostMapping + @RequestBody</p>
+          <pre class="bg-green-100 p-3 rounded text-xs overflow-x-auto text-gray-800"><code>// ✅ 改為 POST + Request Body
+@PostMapping("/list")
+public ResponseEntity&lt;?&gt; getList(@Valid @RequestBody GetListReq req) {
+    // 原本 @RequestParam 的使用改為 req.getStatus() 等
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- ❷ 無法移除的 @RequestParam 補強 -->
+      <div class="mb-6">
+        <h4 class="font-bold text-slate-700 mb-2">❷ 若仍有無法移除的 @RequestParam，需補強驗證與 XSS 過濾</h4>
+        <p class="text-sm text-gray-600 mb-3">當確實無法改為 POST Body 時（如上述例外情境），需手動補強。</p>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+          <p class="text-sm font-semibold text-green-700 mb-2">修正方式 A：補上 @Validated + 驗證標註</p>
+          <pre class="bg-green-100 p-3 rounded text-xs overflow-x-auto mb-3 text-gray-800"><code>import org.springframework.validation.annotation.Validated;
+
+@Validated  // ← 加上此標註，@RequestParam 驗證才會生效
+@RestController
+public class SomeController {
+
+    @GetMapping("/download")
+    public ResponseEntity&lt;?&gt; download(
+        @RequestParam @Size(max = 50, message = "token 長度不可超過50字元") String token
+    ) { ... }
+}</code></pre>
+
+          <p class="text-sm font-medium text-green-800 mb-2">在 RestApiExceptionHandler 補上對應例外處理：</p>
+          <pre class="bg-green-100 p-3 rounded text-xs overflow-x-auto text-gray-800"><code>import jakarta.validation.ConstraintViolationException;
+
+@ExceptionHandler(ConstraintViolationException.class)
+public ResponseEntity&lt;CustomApiResponse&lt;?&gt;&gt; handleConstraintViolation(
+        ConstraintViolationException e) {
+    String errorMessage = e.getConstraintViolations().stream()
+            .map(v -&gt; v.getMessage())
+            .collect(Collectors.joining(", "));
+    return ResponseEntity.badRequest()
+            .body(CustomApiResponse.failure("請求參數錯誤: " + errorMessage));
+}</code></pre>
+        </div>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p class="text-sm font-semibold text-green-700 mb-2">修正方式 B：補上 XSS 過濾（新增全域 Filter）</p>
+          <p class="text-sm text-green-800 mb-2">新增 <code class="bg-green-100 px-1 rounded">XssRequestParameterFilter.java</code>，包裝 HttpServletRequest 覆寫 getParameter：</p>
+          <pre class="bg-green-100 p-3 rounded text-xs overflow-x-auto text-gray-800"><code>package moi.rdss.platform.config.filter;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
+import moi.rdss.platform.utils.XssProtectionUtils;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
+import java.util.Arrays;
+
+@Component
+public class XssRequestParameterFilter extends OncePerRequestFilter {
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+        filterChain.doFilter(new XssRequestWrapper(request), response);
+    }
+
+    static class XssRequestWrapper extends HttpServletRequestWrapper {
+        public XssRequestWrapper(HttpServletRequest request) { super(request); }
+
+        @Override
+        public String getParameter(String name) {
+            return XssProtectionUtils.cleanXSS(super.getParameter(name));
+        }
+
+        @Override
+        public String[] getParameterValues(String name) {
+            String[] values = super.getParameterValues(name);
+            if (values == null) return null;
+            return Arrays.stream(values)
+                    .map(XssProtectionUtils::cleanXSS)
+                    .toArray(String[]::new);
+        }
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <!-- ❸ DTO 欄位缺乏細部驗證 -->
+      <div class="mb-6">
+        <h4 class="font-bold text-slate-700 mb-2">❸ DTO 欄位缺乏細部驗證（只有 @NotBlank，無長度/格式限制）</h4>
+        <p class="text-sm text-gray-600 mb-3">
+          部分 DTO 只標註 <code class="bg-gray-100 px-1 rounded">@NotBlank</code>，但未限制最大長度或字元集，導致可傳入超長字串造成資料庫異常或服務拒絕。
+        </p>
+
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+          <p class="text-sm font-semibold text-green-700 mb-2">修正方式：在 DTO 欄位補上對應驗證標註</p>
+          <pre class="bg-green-100 p-3 rounded text-xs overflow-x-auto text-gray-800"><code>import jakarta.validation.constraints.*;
+
+@NotBlank(message = "帳號不能為空")
+@Size(max = 15, message = "帳號長度不可超過15字元")
+@Pattern(regexp = "^[a-zA-Z0-9_-]+$", message = "帳號只能包含英數字、底線、橫線")
+private String account;
+
+@NotBlank(message = "姓名不能為空")
+@Size(max = 50, message = "姓名長度不可超過50字元")
+private String name;
+
+@Size(max = 200, message = "備註長度不可超過200字元")
+private String remark;</code></pre>
+        </div>
+      </div>
+
+      <!-- 常用驗證標註對照表 -->
+      <div class="mb-6">
+        <h4 class="font-bold text-slate-700 mb-2">常用驗證標註對照表</h4>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+            <thead class="bg-slate-100">
+              <tr>
+                <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">標註</th>
+                <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">說明</th>
+                <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">範例</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="border-b">
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@NotBlank</code></td>
+                <td class="px-4 py-2">不可為空白字串</td>
+                <td class="px-4 py-2">必填文字欄位</td>
+              </tr>
+              <tr class="border-b bg-gray-50">
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@NotNull</code></td>
+                <td class="px-4 py-2">不可為 null</td>
+                <td class="px-4 py-2">必填數值/物件欄位</td>
+              </tr>
+              <tr class="border-b">
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Size(min, max)</code></td>
+                <td class="px-4 py-2">限制字串或集合長度</td>
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Size(max = 50)</code></td>
+              </tr>
+              <tr class="border-b bg-gray-50">
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Min / @Max</code></td>
+                <td class="px-4 py-2">限制數值範圍</td>
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Min(0) @Max(9999)</code></td>
+              </tr>
+              <tr class="border-b">
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Pattern(regexp)</code></td>
+                <td class="px-4 py-2">正則表達式格式驗證</td>
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Pattern(regexp = "^[0-9]+$")</code></td>
+              </tr>
+              <tr class="border-b bg-gray-50">
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Email</code></td>
+                <td class="px-4 py-2">Email 格式驗證</td>
+                <td class="px-4 py-2">Email 欄位</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Digits(integer, fraction)</code></td>
+                <td class="px-4 py-2">限制數字位數</td>
+                <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded">@Digits(integer = 4, fraction = 0)</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 三、驗證原則總結 -->
+    <section>
+      <h3 class="text-lg font-bold text-slate-700 mb-3">三、驗證原則總結</h3>
+      <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+        <ol class="list-decimal list-inside space-y-2 text-sm text-indigo-900">
+          <li>✅ 所有驗證必須在 Server 端（後端）執行，不可只依賴前端</li>
+          <li>✅ JSON Body → 使用 <code class="bg-indigo-100 px-1 rounded">@Valid</code> + DTO 標註</li>
+          <li>✅ @RequestParam / @PathVariable → 使用 <code class="bg-indigo-100 px-1 rounded">@Validated</code> + 標註於參數</li>
+          <li>✅ 字串輸入 → 使用白名單（<code class="bg-indigo-100 px-1 rounded">@Pattern</code> 限制字元集）優先於黑名單</li>
+          <li>✅ XSS 過濾需同時涵蓋 JSON Body 與 URL 參數</li>
+          <li>✅ 驗證失敗統一由 <code class="bg-indigo-100 px-1 rounded">RestApiExceptionHandler</code> 回傳 400 Bad Request</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- 四、相關檔案位置 -->
+    <section>
+      <h3 class="text-lg font-bold text-slate-700 mb-3">四、相關檔案位置</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">檔案</th>
+              <th class="px-4 py-2 text-left font-semibold text-slate-700 border-b">路徑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="border-b">
+              <td class="px-4 py-2 font-medium">XSS 過濾工具</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded text-xs">moi.rdss.platform.utils.XssProtectionUtils</code></td>
+            </tr>
+            <tr class="border-b bg-gray-50">
+              <td class="px-4 py-2 font-medium">XSS JSON Deserializer</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded text-xs">moi.rdss.platform.config.databind.XssStringJsonDeserializer</code></td>
+            </tr>
+            <tr class="border-b">
+              <td class="px-4 py-2 font-medium">密碼規則驗證</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded text-xs">moi.rdss.platform.utils.PWordUtils</code></td>
+            </tr>
+            <tr class="border-b bg-gray-50">
+              <td class="px-4 py-2 font-medium">統一例外處理</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded text-xs">moi.rdss.platform.exception.handler.RestApiExceptionHandler</code></td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-medium">安全設定</td>
+              <td class="px-4 py-2"><code class="bg-gray-100 px-1 rounded text-xs">moi.rdss.platform.config.SecurityConfig</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 優先修正建議 -->
+    <section>
+      <h3 class="text-lg font-bold text-slate-700 mb-3">📌 優先修正建議</h3>
+      <div class="bg-rose-50 border border-rose-200 rounded-lg p-4">
+        <ol class="list-decimal list-inside space-y-3 text-sm text-rose-900">
+          <li>
+            <span class="font-bold">（首選）</span> 將現有 <code class="bg-rose-100 px-1 rounded">GET + @RequestParam</code> API 全面改為
+            <code class="bg-rose-100 px-1 rounded">POST + Request Body + DTO</code>，同時解決 XSS 過濾與 Bean Validation 問題
+          </li>
+          <li>
+            <span class="font-bold">（無法改 POST 時）</span> 補上 <code class="bg-rose-100 px-1 rounded">@Validated</code> + 驗證標註，並新增
+            <code class="bg-rose-100 px-1 rounded">XssRequestParameterFilter</code>
+          </li>
+          <li>
+            逐一檢視既有 DTO 欄位是否補上 <code class="bg-rose-100 px-1 rounded">@Size</code> 長度限制與
+            <code class="bg-rose-100 px-1 rounded">@Pattern</code> 字元集白名單
+          </li>
+        </ol>
+      </div>
+    </section>
+  </div>
+</template>
+
+<script setup>
+</script>

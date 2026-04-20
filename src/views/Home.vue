@@ -7,7 +7,23 @@
       </nav>
       <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 sm:gap-3">
         <h2 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold break-words max-w-full">RDSS專案-前後端協作規範</h2>
-        <span class="text-xs sm:text-sm text-gray-500 shrink-0">最後編輯日期：2026-03-04</span>
+        <div class="flex items-center gap-3 shrink-0">
+          <button
+            @click="handleDownload"
+            :disabled="isDownloading"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg v-if="!isDownloading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <svg v-else class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            {{ isDownloading ? '打包中...' : '下載規範MD檔' }}
+          </button>
+          <span class="text-xs sm:text-sm text-gray-500">最後編輯日期：2026-04-20</span>
+        </div>
       </div>
     </header>
 
@@ -90,7 +106,7 @@
 
       <!-- Main content with responsive width -->
       <main id="sections" class="flex-1 min-w-0 w-full max-w-full overflow-x-hidden">
-        <n-collapse :default-expanded-names="expandedNames" arrow-placement="right">
+        <n-collapse v-model:expanded-names="expandedNames" display-directive="if" arrow-placement="right">
           <n-collapse-item 
             v-for="section in sections" 
             :key="section.id" 
@@ -118,63 +134,32 @@
 <script setup>
 import { defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { NCollapse, NCollapseItem } from 'naive-ui'
+import { downloadAllDocs } from '@/utils/downloadDocs'
+
+const isDownloading = ref(false)
+
+const handleDownload = async () => {
+  isDownloading.value = true
+  try {
+    await downloadAllDocs()
+  } finally {
+    isDownloading.value = false
+  }
+}
 
 const sections = [
-  { 
-    id: 'section-1',
-    title: '1. API 協作規則',
-    component: defineAsyncComponent(() => import('@/content/ApiFormat.vue'))
-  },
-  { 
-    id: 'section-2',
-    title: '2. 參數一致性',
-    component: defineAsyncComponent(() => import('@/content/ResponseStructure.vue'))
-  },
-  { 
-    id: 'section-3',
-    title: '3. 日期與時間格式',
-    component: defineAsyncComponent(() => import('@/content/DateTimeFormat.vue'))
-  },
-  { 
-    id: 'section-4',
-    title: '4. 分頁資料格式',
-    component: defineAsyncComponent(() => import('@/content/PaginationFormat.vue'))
-  },
-  { 
-    id: 'section-5',
-    title: '5. API 呼叫方式',
-    component: defineAsyncComponent(() => import('@/content/ApiCallMethod.vue'))
-  },
-  { 
-    id: 'section-6',
-    title: '6. 文字欄位長度',
-    component: defineAsyncComponent(() => import('@/content/TextFieldLength.vue'))
-  },
-  { 
-    id: 'section-7',
-    title: '7. 上傳格式',
-    component: defineAsyncComponent(() => import('@/content/UploadFormat.vue'))
-  },
-  { 
-    id: 'section-8',
-    title: '8. 下載格式',
-    component: defineAsyncComponent(() => import('@/content/DownloadFormat.vue'))
-  },
-  { 
-    id: 'section-9',
-    title: '9. 下拉選單 API (待討論)',
-    component: defineAsyncComponent(() => import('@/content/DropdownApi.vue'))
-  },
-  { 
-    id: 'appendix',
-    title: '10. 測試環境',
-    component: defineAsyncComponent(() => import('@/content/TestEnvironment.vue'))
-  },
-  { 
-    id: 'section-11',
-    title: '11. 測試帳號',
-    component: defineAsyncComponent(() => import('@/content/TestAccounts.vue'))
-  }
+  { id: 'section-1', title: '1. API 協作規則', component: defineAsyncComponent(() => import('@/content/ApiFormat.vue')) },
+  { id: 'section-2', title: '2. 參數一致性', component: defineAsyncComponent(() => import('@/content/ResponseStructure.vue')) },
+  { id: 'section-3', title: '3. 日期與時間格式', component: defineAsyncComponent(() => import('@/content/DateTimeFormat.vue')) },
+  { id: 'section-4', title: '4. 分頁資料格式', component: defineAsyncComponent(() => import('@/content/PaginationFormat.vue')) },
+  { id: 'section-5', title: '5. API 呼叫方式', component: defineAsyncComponent(() => import('@/content/ApiCallMethod.vue')) },
+  { id: 'section-6', title: '6. 文字欄位長度', component: defineAsyncComponent(() => import('@/content/TextFieldLength.vue')) },
+  { id: 'section-7', title: '7. 上傳格式', component: defineAsyncComponent(() => import('@/content/UploadFormat.vue')) },
+  { id: 'section-8', title: '8. 下載格式', component: defineAsyncComponent(() => import('@/content/DownloadFormat.vue')) },
+  { id: 'section-9', title: '9. 下拉選單 API (待討論)', component: defineAsyncComponent(() => import('@/content/DropdownApi.vue')) },
+  { id: 'section-10', title: '10. 後端輸入驗證實作規範', component: defineAsyncComponent(() => import('@/content/BackendValidation.vue')) },
+  { id: 'appendix', title: '11. 測試環境', component: defineAsyncComponent(() => import('@/content/TestEnvironment.vue')) },
+  { id: 'section-12', title: '12. 測試帳號', component: defineAsyncComponent(() => import('@/content/TestAccounts.vue')) }
 ]
 
 const activeSection = ref(sections[0]?.id || '')
@@ -182,8 +167,8 @@ const showMobileMenu = ref(false)
 let onScrollHandler
 let rafId = null
 
-// 預設全部展開
-const expandedNames = sections.map(s => s.id)
+// 預設全部收合，點擊才展開（避免大量 DOM 造成卡頓）
+const expandedNames = ref([])
 
 // 切換移動版選單
 const toggleMobileMenu = () => {
